@@ -1,5 +1,8 @@
 # MLPEG
 
-[X] Project Directory
-[] Download Data
-[] Clean Data
+Machine learning implemented in data compression.
+
+TODO:
+- [x] Project Directory
+- [] Download Data
+- [] Clean Data
