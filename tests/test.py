@@ -43,4 +43,3 @@ start_time = time.time()
 upscale('output/partial_res', 'output/edsr', algorithm='edsr')
 print("\n--- %s seconds ---" % (time.time() - start_time))
 percent_diff('output/full_res', 'output/edsr')
-

@@ -7,7 +7,7 @@ TODO:
 - [x] Download Data
 - [x] Clean Data
 - [ ] temporal reconstruction
-- [ ] upscaling images
+- [x] upscaling images
 
 References:
 - Video Frame Interpolation via Adaptive Separable Convolution https://github.com/sniklaus/revisiting-sepconv
