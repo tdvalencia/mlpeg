@@ -1,5 +1,5 @@
 *.jpg
-*.mp4
+*.mlpg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

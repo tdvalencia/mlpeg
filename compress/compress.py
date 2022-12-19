@@ -29,12 +29,13 @@ def decimate(video_path, output_path, full_res=False, partial_res=False):
     while success:
         if full_res:
             cv2.imwrite(f'{output_path}/full_res/{count:04d}.jpg', frame)
-        if partial_res or count in keyframe_indecies:
+
+        if partial_res:
             resized = cv2.resize(frame, (dimensions[1]//4, dimensions[0]//4))
 
-            if partial_res:
-                cv2.imwrite(f'{output_path}/partial_res/{count:04d}.jpg', resized)
-
+            cv2.imwrite(f'{output_path}/partial_res/{count:04d}.jpg', resized)
+        if count in keyframe_indecies:
+            resized = cv2.resize(frame, (dimensions[1]//4, dimensions[0]//4))
             encoded_image = cv2.imencode('.jpg', resized)
             buffer = io.BytesIO(encoded_image[1])
             keyframes.append(buffer)
