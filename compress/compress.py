@@ -4,6 +4,9 @@ import os
 import pickle
 import io
 
+DOWNSCALE_RATIO = 16
+
+# Separates keyframes using scenedetect
 def decimate(video_path, output_path, full_res=False, partial_res=False):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
@@ -30,12 +33,14 @@ def decimate(video_path, output_path, full_res=False, partial_res=False):
         if full_res:
             cv2.imwrite(f'{output_path}/full_res/{count:04d}.jpg', frame)
 
+        # Downscale Images using cv2
         if partial_res:
-            resized = cv2.resize(frame, (dimensions[1]//4, dimensions[0]//4))
-
+            resized = cv2.resize(frame, 
+                (dimensions[1]//DOWNSCALE_RATIO, dimensions[0]//DOWNSCALE_RATIO))
             cv2.imwrite(f'{output_path}/partial_res/{count:04d}.jpg', resized)
         if count in keyframe_indecies:
-            resized = cv2.resize(frame, (dimensions[1]//4, dimensions[0]//4))
+            resized = cv2.resize(frame,
+                (dimensions[1]//DOWNSCALE_RATIO, dimensions[0]//DOWNSCALE_RATIO))
             encoded_image = cv2.imencode('.jpg', resized)
             buffer = io.BytesIO(encoded_image[1])
             keyframes.append(buffer)
@@ -45,6 +50,7 @@ def decimate(video_path, output_path, full_res=False, partial_res=False):
         print('\rWriting frame: ', count, end='')
         count += 1
 
+    # Save keyframe_data
     data = {
         'dimensions': dimensions,
         'keyframe_indecies': keyframe_indecies,
