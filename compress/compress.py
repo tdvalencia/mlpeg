@@ -4,7 +4,7 @@ import os
 import pickle
 import io
 
-DOWNSCALE_RATIO = 16
+DOWNSCALE_RATIO = 4
 
 # Separates keyframes using scenedetect
 def decimate(video_path, output_path, full_res=False, partial_res=False):
