@@ -4,6 +4,7 @@ import os
 import pickle
 import io
 
+# Why x4 compression?: For algoritm
 DOWNSCALE_RATIO = 4
 
 # Separates keyframes using scenedetect
