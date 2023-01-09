@@ -14,21 +14,27 @@ SAMPLE_RATE = 16 # Play with this value
 
 # Separates keyframes using scenedetect and every 16th frame
 def decimate(video_path, output_path):
+    # Create directory for output path
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
+    # Initial values
+    print(f'Cutting at Sample Rate: {SAMPLE_RATE}')
     vidcap = cv2.VideoCapture(video_path)
-
+    total_frames = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
     keyframes = []
     keyframe_indicies = []
-    print(f'Cutting at Sample Rate: {SAMPLE_RATE}')
-    total_frames = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    # Iterate through frames of video at sample rate
     for fno in range(0, total_frames, SAMPLE_RATE):
+
+        # Collect frame data
         vidcap.set(cv2.CAP_PROP_POS_FRAMES, fno)
         _, frame = vidcap.read()
         dimensions = frame.shape
         keyframe_indicies.append(fno)
 
+        # Downscale and write downscaled image to output path
         resized = cv2.resize(frame,
             (dimensions[1]//DOWNSCALE_RATIO, dimensions[0]//DOWNSCALE_RATIO))
         encoded_image = cv2.imencode('.jpg', resized)
@@ -38,13 +44,14 @@ def decimate(video_path, output_path):
 
         print('\rWriting frame: ', fno, end='')
 
-    # Save keyframe_data
+    # Save keyframe data
     data = {
         'dimensions': dimensions,
         'keyframe_indecies': keyframe_indicies,
         'keyframes': keyframes,
     }
 
+    # Write keyframe data to file
     with open(f'{output_path}/data.mlpg', 'wb') as f:
         pickle.dump(data, f)
 
