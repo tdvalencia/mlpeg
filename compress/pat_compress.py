@@ -1,5 +1,8 @@
 '''
     Compression using constant frame pattern on 16:9 video
+
+    Pattern Compression because most straightfoward and removed a sizable
+    amount of data.
 '''
 
 import cv2

@@ -8,9 +8,11 @@ TODO:
 - [x] Clean Data
 - [x] temporal reconstruction
 - [x] upscaling images
-- [ ] interframe data
-- [ ] full-fledge testing
-- [ ] training loop
+- [x] interframe data
+- [x] testing of upscale models
+- [ ] testing of interpolation models
+- [ ] run interpolation on all frames
+- [ ] Clean repositiory
 
 References:
 - Video Frame Interpolation via Adaptive Separable Convolution https://github.com/sniklaus/revisiting-sepconv

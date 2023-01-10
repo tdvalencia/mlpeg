@@ -21,7 +21,7 @@ def upscale(input_path, output_path, algorithm='espcn'):
             print('\rUpscaled frame: ', count, end='')
 
 
-# FILM frame reconstruction
+# Google FILM frame reconstruction
 
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -31,8 +31,6 @@ import numpy as np
 
 from typing import Generator, Iterable, List, Optional
 import mediapy as media
-
-model = hub.load("https://tfhub.dev/google/film/1")
 
 _UINT8_MAX_F = float(np.iinfo(np.uint8).max)
 def load_image(img_url: str):
@@ -183,7 +181,12 @@ def interpolate_recursively(
   yield frames[-1]
 
 if __name__ == '__main__':
-    # upscale images
-    
+  # upscale images
+  
 
-    # loop to recursively interpolate
+  # loop to recursively interpolate
+  total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+  for fno in range(0, total_frames, sample_rate):
+    cap.set(cv2.CAP_PROP_POS_FRAMES, fno)
+    _, image = cap.read()
+    do_something(image)

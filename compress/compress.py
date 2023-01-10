@@ -5,6 +5,7 @@ import pickle
 import io
 
 # Why x4 compression?: For algoritm
+# ALL DATA INPUT 1920x1080 before downscale
 DOWNSCALE_RATIO = 4
 
 # Separates keyframes using scenedetect
