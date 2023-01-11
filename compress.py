@@ -10,6 +10,7 @@ from scenedetect import detect, ContentDetector
 import os
 import pickle
 import io
+import sys
 
 # Why x4 compression?: For algoritm
 DOWNSCALE_RATIO = 4
@@ -59,4 +60,7 @@ def decimate(video_path, output_path):
         pickle.dump(data, f)
 
 if __name__ == '__main__':
-    decimate('video.mp4', 'frames')
+    if sys.argv[1]:
+        decimate(sys.argv[1], 'frames')
+    else:
+        decimate('video.mp4', 'frames')
