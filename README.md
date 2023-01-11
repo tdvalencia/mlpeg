@@ -11,7 +11,7 @@ TODO:
 - [x] interframe data
 - [x] testing of upscale models
 - [ ] testing of interpolation models
-- [ ] run interpolation on all frames
+- [x] run interpolation on all frames
 - [ ] Clean repositiory
 
 References:
