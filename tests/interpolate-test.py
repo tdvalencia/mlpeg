@@ -5,8 +5,7 @@
 import sys, os, cv2, time
 import numpy as np
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..//compress')))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..//decompress')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from compress import decimate
 from decompress import Interpolator, load_image, interpolate_recursively
@@ -15,10 +14,10 @@ if __name__ == '__main__':
 
     # splitting the video into keyframes
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
-    decimate('video.mp4', 'output')
+    decimate('../videos/saul.mp4', 'output')
 
     # constants
-    path = '../compress/frames'
+    path = '../frames'
     directory = sorted(os.listdir(path))
 
     # collecting frames
