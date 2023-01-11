@@ -3,10 +3,17 @@ from scenedetect import detect, ContentDetector
 import os
 import pickle
 import io
+from numpy import *
+from scipy import ndimage
 
 # Why x4 compression?: For algoritm
 # ALL DATA INPUT 1920x1080 before downscale
 DOWNSCALE_RATIO = 4
+
+def detect_edges(image, kernel):
+    edges = zeros(image.shape)
+    edges = maximum(scipy.ndimage.convolve(image, kernel), edges)
+    return edges
 
 # Separates keyframes using scenedetect
 def decimate(video_path, output_path, full_res=False, partial_res=False):
@@ -31,6 +38,8 @@ def decimate(video_path, output_path, full_res=False, partial_res=False):
         print(f'Scene {i + 1}: Start Frame: {scene[0].get_frames()}, End Frame: {scene[1].get_frames() - 1}')
 
     keyframes = []
+    interframe_indecies = []
+    interframes = []
     while success:
         if full_res:
             cv2.imwrite(f'{output_path}/full_res/{count:04d}.jpg', frame)
@@ -47,6 +56,14 @@ def decimate(video_path, output_path, full_res=False, partial_res=False):
             buffer = io.BytesIO(encoded_image[1])
             keyframes.append(buffer)
             cv2.imwrite(f'{output_path}/{count:04d}.jpg', resized)
+        else:
+            frame = cv2.cvtColor(src=frame, code=cv2.COLOR_BGR2GRAY)
+            resized = cv2.resize(frame, (dimensions[1]//8, dimensions[0]//8))
+            kernel = [ [-1, -1, -1], [-1, 8, -1], [-1, -1, 1] ]
+            edges = detect_edges(resized, kernel)
+            interframe_indecies.append(count)
+            print(edges)
+            # interframes.append(edges)
 
         success, frame = vidcap.read()
         print('\rWriting frame: ', count, end='')
@@ -55,8 +72,11 @@ def decimate(video_path, output_path, full_res=False, partial_res=False):
     # Save keyframe_data
     data = {
         'dimensions': dimensions,
+        'total_frames': count,
         'keyframe_indecies': keyframe_indecies,
         'keyframes': keyframes,
+        'interframe_indecies': interframe_indecies,
+        'interframes': interframes
     }
 
     with open(f'{output_path}/data.mlpg', 'wb') as f:

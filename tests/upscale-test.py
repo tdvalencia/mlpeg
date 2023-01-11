@@ -14,6 +14,7 @@ from decompress import upscale
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 decimate('video.mp4', 'output', full_res=True, partial_res=True)
 
+# method uses CV2 absdiff to analyze the percent difference between deimated and upscaled images
 def percent_diff(folder1, folder2):
     total = 0
     filenames1 = os.listdir(folder1)
