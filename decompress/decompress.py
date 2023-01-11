@@ -32,14 +32,16 @@ import numpy as np
 from typing import Generator, Iterable, List, Optional
 import mediapy as media
 
+from cv2 import VideoWriter
+
 _UINT8_MAX_F = float(np.iinfo(np.uint8).max)
 def load_image(img_url: str):
   """Returns an image with shape [height, width, num_channels], with pixels in [0..1] range, and type np.float32."""
-    image_data = tf.io.read_file(img_url)
+  image_data = tf.io.read_file(img_url)
 
-    image = tf.io.decode_image(image_data, channels=3)
-    image_numpy = tf.cast(image, dtype=tf.float32).numpy()
-    return image_numpy / _UINT8_MAX_F
+  image = tf.io.decode_image(image_data, channels=3)
+  image_numpy = tf.cast(image, dtype=tf.float32).numpy()
+  return image_numpy / _UINT8_MAX_F
 
 """A wrapper class for running a frame interpolation based on the FILM model on TFHub
 
@@ -176,17 +178,6 @@ def interpolate_recursively(
   n = len(frames)
   for i in range(1, n):
     yield from _recursive_generator(frames[i - 1], frames[i],
-                                    times_to_interpolate, interpolator)
+                                    num_recursions, interpolator)
   # Separately yield the final frame.
   yield frames[-1]
-
-if __name__ == '__main__':
-  # upscale images
-  
-
-  # loop to recursively interpolate
-  total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-  for fno in range(0, total_frames, sample_rate):
-    cap.set(cv2.CAP_PROP_POS_FRAMES, fno)
-    _, image = cap.read()
-    do_something(image)

@@ -1,5 +1,11 @@
+'''
+    Compression using constant frame pattern on 16:9 video
+
+    Pattern Compression because most straightfoward and removed a sizable
+    amount of data.
+'''
+
 import cv2
-from scenedetect import detect, ContentDetector
 import os
 import pickle
 import io
@@ -7,80 +13,53 @@ from numpy import *
 from scipy import ndimage
 
 # Why x4 compression?: For algoritm
-# ALL DATA INPUT 1920x1080 before downscale
 DOWNSCALE_RATIO = 4
+SAMPLE_RATE = 16 # Play with this value
 
-def detect_edges(image, kernel):
-    edges = zeros(image.shape)
-    edges = maximum(scipy.ndimage.convolve(image, kernel), edges)
-    return edges
-
-# Separates keyframes using scenedetect
-def decimate(video_path, output_path, full_res=False, partial_res=False):
+# Separates keyframes using scenedetect and every 16th frame
+def decimate(video_path, output_path):
+    # Create directory for output path
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-    if full_res and not os.path.exists(f'{output_path}/full_res'): 
-        os.makedirs(f'{output_path}/full_res')
-    if partial_res and not os.path.exists(f'{output_path}/partial_res'):
-        os.makedirs(f'{output_path}/partial_res')
 
+    # Initial values
+    print(f'Cutting at Sample Rate: {SAMPLE_RATE}')
     vidcap = cv2.VideoCapture(video_path)
-    success, frame = vidcap.read()
-    dimensions = frame.shape
-    count = 0
-
-    print('Searching for cuts...')
-    scene_list = detect(video_path, ContentDetector())
-    keyframe_indecies = []
-    for i, scene in enumerate(scene_list):
-        keyframe_indecies.append(scene[0].get_frames())
-        keyframe_indecies.append(scene[1].get_frames() - 1)
-        print(f'Scene {i + 1}: Start Frame: {scene[0].get_frames()}, End Frame: {scene[1].get_frames() - 1}')
-
+    total_frames = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
     keyframes = []
-    interframe_indecies = []
-    interframes = []
-    while success:
-        if full_res:
-            cv2.imwrite(f'{output_path}/full_res/{count:04d}.jpg', frame)
+    keyframe_indicies = []
 
-        # Downscale Images using cv2
-        if partial_res:
-            resized = cv2.resize(frame, 
-                (dimensions[1]//DOWNSCALE_RATIO, dimensions[0]//DOWNSCALE_RATIO))
-            cv2.imwrite(f'{output_path}/partial_res/{count:04d}.jpg', resized)
-        if count in keyframe_indecies:
-            resized = cv2.resize(frame,
-                (dimensions[1]//DOWNSCALE_RATIO, dimensions[0]//DOWNSCALE_RATIO))
-            encoded_image = cv2.imencode('.jpg', resized)
-            buffer = io.BytesIO(encoded_image[1])
-            keyframes.append(buffer)
-            cv2.imwrite(f'{output_path}/{count:04d}.jpg', resized)
-        else:
-            frame = cv2.cvtColor(src=frame, code=cv2.COLOR_BGR2GRAY)
-            resized = cv2.resize(frame, (dimensions[1]//8, dimensions[0]//8))
-            kernel = [ [-1, -1, -1], [-1, 8, -1], [-1, -1, 1] ]
-            edges = detect_edges(resized, kernel)
-            interframe_indecies.append(count)
-            print(edges)
-            # interframes.append(edges)
+    # Iterate through frames of video at sample rate
+    for fno in range(0, total_frames, SAMPLE_RATE):
 
-        success, frame = vidcap.read()
-        print('\rWriting frame: ', count, end='')
-        count += 1
+        # Collect frame data
+        vidcap.set(cv2.CAP_PROP_POS_FRAMES, fno)
+        _, frame = vidcap.read()
+        dimensions = frame.shape
+        keyframe_indicies.append(fno)
 
-    # Save keyframe_data
+        # Downscale and write downscaled image to output path
+        resized = cv2.resize(frame,
+            (dimensions[1]//DOWNSCALE_RATIO, dimensions[0]//DOWNSCALE_RATIO))
+        encoded_image = cv2.imencode('.jpg', resized)
+        buffer = io.BytesIO(encoded_image[1])
+        keyframes.append(buffer)
+        cv2.imwrite(f'{output_path}/{fno:04d}.jpg', resized)
+
+        print('\rWriting frame: ', fno, end='')
+
+    # Save keyframe data
     data = {
         'dimensions': dimensions,
-        'total_frames': count,
-        'keyframe_indecies': keyframe_indecies,
+        'keyframe_indecies': keyframe_indicies,
         'keyframes': keyframes,
         'interframe_indecies': interframe_indecies,
         'interframes': interframes
     }
 
+    # Write keyframe data to file
     with open(f'{output_path}/data.mlpg', 'wb') as f:
         pickle.dump(data, f)
 
 if __name__ == '__main__':
-    decimate('video.mp4', 'frames', full_res=True, partial_res=False)
+    decimate('video.mp4', 'frames')
