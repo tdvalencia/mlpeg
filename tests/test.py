@@ -4,10 +4,10 @@ import pandas as pd
 import numpy as np
 from cv2 import VideoWriter
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..//')))
+sys.path.insert(0, '..')
+
 from compress import decimate
-from decompress import Interpolator, load_image, interpolate_recursively
-os.chdir(os.path.abspath(os.path.dirname(__file__)))
+from decompress import Interpolator, load_image, interpolate_recursively, upscale
 
 input_folder = 'suite_test'
 output_folder = 'suite_test_output'
@@ -26,7 +26,7 @@ df = pd.DataFrame(columns=['filename', 'mp4 sizes', 'mlpg sizes', 'ratio', 'comp
 for file in arr:
     this_file_output = f'{output_folder}/{file[:-3]}'
     start = time.time()
-    decimate(f'{input_folder}/{file}', this_file_output)
+    data = decimate(f'{input_folder}/{file}', this_file_output)
     compress_time = time.time() - start
     print(f'\nCompressing {file} took {compress_time} seconds.')
 
@@ -44,6 +44,7 @@ for file in arr:
     print(f'video with {len(frames)} frames')
 
     video = VideoWriter(f'{this_file_output}/output.avi', cv2.VideoWriter_fourcc(*"MJPG"), 30, (1920, 1080))
+    upscaled_frames = upscale(frames)
     for image in frames:
         video.write(image)
     cv2.destroyAllWindows()

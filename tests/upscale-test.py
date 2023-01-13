@@ -5,10 +5,10 @@
 
 import sys, os, cv2, time
 import numpy as np
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..//compress')))
-from compress import decimate
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..//decompress')))
+sys.path.insert(0, '..')
+
+from compress import decimate
 from decompress import upscale
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))

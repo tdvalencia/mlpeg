@@ -6,7 +6,6 @@
 '''
 
 import cv2
-from scenedetect import detect, ContentDetector
 import os
 import pickle
 import io
@@ -32,7 +31,7 @@ def decimate(video_path, output_path):
     # Iterate through frames of video at sample rate
     for fno in range(0, total_frames, SAMPLE_RATE):
 
-        # Collect frame data
+        # Collect original frame data
         vidcap.set(cv2.CAP_PROP_POS_FRAMES, fno)
         _, frame = vidcap.read()
         dimensions = frame.shape
@@ -58,6 +57,8 @@ def decimate(video_path, output_path):
     # Write keyframe data to file
     with open(f'{output_path}/data.mlpg', 'wb') as f:
         pickle.dump(data, f)
+
+    return data
 
 if __name__ == '__main__':
     if sys.argv[1]:

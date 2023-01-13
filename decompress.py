@@ -1,38 +1,79 @@
-# Image upscaling
+'''
+    Decompression using constant frame pattern on 16:9 video
+
+    Image upscaling using ESPCN upscaling model and Google FILM
+    for upscaling and interpolation.
+'''
+
+import pickle
 
 import cv2, os
 from cv2 import dnn_superres
 
-def upscale(input_path, output_path, algorithm='espcn'):
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-
-    sr = dnn_superres.DnnSuperResImpl_create()
-    sr.readModel(os.path.join(os.path.dirname(__file__), f'{algorithm}_x4.pb'))
-    sr.setModel(algorithm, 4)
-
-    count = 0
-    for filename in os.listdir(input_path):
-        if filename.endswith('.jpg'):
-            image = cv2.imread(f'{input_path}/{filename}')
-            result = sr.upsample(image)
-            cv2.imwrite(f'{output_path}/{filename}', result)
-            count += 1
-            print('\rUpscaled frame: ', count, end='')
-
-
-# Google FILM frame reconstruction
-
 import tensorflow as tf
 import tensorflow_hub as hub
 
-import requests
 import numpy as np
 
-from typing import Generator, Iterable, List, Optional
-import mediapy as media
+from typing import Generator, Iterable, List
 
-from cv2 import VideoWriter
+# Parsing .mlpg file
+
+def parse_mlpg(path, filename):
+  '''
+    Opens mlpg file and decodes keyframe data
+  '''
+
+  with open(f'{path}/{filename}', 'rb') as f:
+    data = pickle.load(f)
+
+  frames = []
+  for frame in data['keyframes']:
+    buf = frame.read()
+    nparr = np.frombuffer(buf, np.uint8)
+    img_np = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+    frames.append(img_np)
+
+  return data, frames
+
+# Image upscaling
+
+def upscale_file(input_path, output_path, algorithm='espcn'):
+  '''
+    Upscales images in a directory given a directory
+  '''
+  if not os.path.exists(output_path):
+      os.makedirs(output_path)
+
+  sr = dnn_superres.DnnSuperResImpl_create()
+  sr.readModel(os.path.join(os.path.dirname(__file__), f'{algorithm}_x4.pb'))
+  sr.setModel(algorithm, 4)
+
+  count = 0
+  for filename in os.listdir(input_path):
+      if filename.endswith('.jpg'):
+          image = cv2.imread(f'{input_path}/{filename}')
+          result = sr.upsample(image)
+          cv2.imwrite(f'{output_path}/{filename}', result)
+          count += 1
+          print('\rUpscaled frame: ', count, end='')
+
+def upscale(image_array, path_to_model_dir, algorithm='espcn'):
+  '''
+    Upscales an image array
+  '''
+  sr = dnn_superres.DnnSuperResImpl_create()
+  sr.readModel(f'{path_to_model_dir}/{algorithm}_x4.pb')
+  sr.setModel(algorithm, 4)
+
+  upscaled_image_array = []
+  for image in image_array:
+    result = sr.upsample(image)
+    upscaled_image_array.append(result)
+  
+  return upscaled_image_array
+
+# Google FILM frame reconstruction
 
 _UINT8_MAX_F = float(np.iinfo(np.uint8).max)
 def load_image(img_url: str):

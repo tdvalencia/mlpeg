@@ -2,10 +2,10 @@
     Tests model interpolation
 '''
 
-import sys, os, cv2, time
-import numpy as np
+import sys, os, cv2
+from cv2 import VideoWriter
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, '..')
 
 from compress import decimate
 from decompress import Interpolator, load_image, interpolate_recursively
@@ -24,8 +24,9 @@ if __name__ == '__main__':
     print('Collecting frames')
     input_frames = []
     for file in directory:
-        img = load_image(f'{path}/{file}')
-        input_frames.append(img)
+        if file != 'data.mlpg':
+            img = load_image(f'{path}/{file}')
+            input_frames.append(img)
 
     print('Creating interpolator')
     interpolator = Interpolator()
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     print(f'Running interpolation @ times_to_interpolate={times_to_interpolate}')
     frames = list(interpolate_recursively(input_frames, times_to_interpolate,
                                         interpolator))
-    video = VideoWriter('output.avi', 0, 1, (width,height))
+    video = VideoWriter('output.avi', 0, 1, (480, 270))
 
     print('Writing Video')
     for image in frames:
