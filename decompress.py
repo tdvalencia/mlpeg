@@ -19,6 +19,26 @@ from typing import Generator, Iterable, List
 
 # Parsing .mlpg file
 
+def decode_keyframes(mlpg_keyframes):
+  '''
+    Reverses compression of frame data
+      1. BytesIO
+      2. cv2 imencoded
+
+  '''
+  # frames = []
+  # for frame in mlpg_keyframes:
+  #   buf = frame.read()
+  #   nparr = np.frombuffer(buf, np.uint8)
+  #   img_np = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+  #   frames.append(img_np)
+
+  return [cv2.imdecode(
+    np.frombuffer(frame.read(), np.uint8), 
+    cv2.IMREAD_UNCHANGED)
+    for frame in mlpg_keyframes]
+
+
 def parse_mlpg(path, filename):
   '''
     Opens mlpg file and decodes keyframe data
@@ -27,14 +47,7 @@ def parse_mlpg(path, filename):
   with open(f'{path}/{filename}', 'rb') as f:
     data = pickle.load(f)
 
-  frames = []
-  for frame in data['keyframes']:
-    buf = frame.read()
-    nparr = np.frombuffer(buf, np.uint8)
-    img_np = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-    frames.append(img_np)
-
-  return data, frames
+  return data, decode_keyframes(data['keyframes'])
 
 # Image upscaling
 
@@ -66,12 +79,12 @@ def upscale(image_array, path_to_model_dir, algorithm='espcn'):
   sr.readModel(f'{path_to_model_dir}/{algorithm}_x4.pb')
   sr.setModel(algorithm, 4)
 
-  upscaled_image_array = []
-  for image in image_array:
-    result = sr.upsample(image)
-    upscaled_image_array.append(result)
+  # upscaled_image_array = []
+  # for image in image_array:
+  #   result = sr.upsample(image)
+  #   upscaled_image_array.append(result)
   
-  return upscaled_image_array
+  return [sr.upsample(image) for image in image_array]
 
 # Google FILM frame reconstruction
 

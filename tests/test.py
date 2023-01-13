@@ -1,13 +1,12 @@
 import sys, os, time, cv2
 from pathlib import Path
 import pandas as pd
-import numpy as np
 from cv2 import VideoWriter
 
 sys.path.insert(0, '..')
 
 from compress import decimate
-from decompress import Interpolator, load_image, interpolate_recursively, upscale
+from decompress import Interpolator, load_image, interpolate_recursively, upscale, decode_keyframes
 
 input_folder = 'suite_test'
 output_folder = 'suite_test_output'
@@ -32,11 +31,7 @@ for file in arr:
 
     start = time.time()
     directory = sorted(os.listdir(this_file_output))
-    input_frames = []
-    for image in directory:
-        if image.endswith('.jpg'):
-            img = load_image(f'{this_file_output}/{image}')
-            input_frames.append(img)    
+    input_frames = decode_keyframes(data['keyframes'])  
     print(f'Running interpolation @ times_to_interpolate={times_to_interpolate}')
     frames = list(interpolate_recursively(input_frames, times_to_interpolate, interpolator))
     decompress_time = time.time() - start

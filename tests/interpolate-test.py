@@ -22,17 +22,19 @@ if __name__ == '__main__':
 
     # collecting frames
     print('Collecting frames')
-    input_frames = []
-    for file in directory:
-        if file != 'data.mlpg':
-            img = load_image(f'{path}/{file}')
-            input_frames.append(img)
+    # input_frames = []
+    # for file in directory:
+    #     if file != 'data.mlpg':
+    #         img = load_image(f'{path}/{file}')
+    #         input_frames.append(img)
+    input_frames = [load_image(f'{path}/{file}')
+                    for file in directory if file != 'data.mplg']
 
     print('Creating interpolator')
     interpolator = Interpolator()
     times_to_interpolate = 1
 
-    print(f'Running interpolation @ times_to_interpolate={times_to_interpolate}')
+    print(f'Running interpolation @ times_to_interpolate = {times_to_interpolate}')
     frames = list(interpolate_recursively(input_frames, times_to_interpolate,
                                         interpolator))
     video = VideoWriter('output.avi', 0, 1, (480, 270))
