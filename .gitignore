@@ -157,6 +157,11 @@ cython_debug/
 
 # Lossless frames
 frames/
+
+# Testing Directory
 tests/output
+tests/suite_test_output
 youtube-dl.exe
+
+# Model Directory
 models/film

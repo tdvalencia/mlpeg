@@ -1,12 +1,13 @@
-import sys, os, time, cv2
+import sys, os, time
 from pathlib import Path
 import pandas as pd
-from cv2 import VideoWriter
+import mediapy as media
+import numpy as np
 
 sys.path.insert(0, '..')
 
 from compress import decimate
-from decompress import Interpolator, load_image, interpolate_recursively, upscale, decode_keyframes
+from decompress import Interpolator, interpolate_recursively, upscale, decode_keyframes
 
 input_folder = 'suite_test'
 output_folder = 'suite_test_output'
@@ -20,7 +21,7 @@ arr = os.listdir(direc)
 interpolator = Interpolator()
 times_to_interpolate = 1
 
-df = pd.DataFrame(columns=['filename', 'mp4 sizes', 'mlpg sizes', 'ratio', 'compress time', 'decompress time'])
+df = pd.DataFrame(columns=['filename', 'mp4 sizes', 'mlpg sizes (mlpg/mp4)', 'ratio', 'compress time', 'decompress time'])
 
 for file in arr:
     this_file_output = f'{output_folder}/{file[:-3]}'
@@ -30,20 +31,21 @@ for file in arr:
     print(f'\nCompressing {file} took {compress_time} seconds.')
 
     start = time.time()
-    directory = sorted(os.listdir(this_file_output))
-    input_frames = decode_keyframes(data['keyframes'])  
-    print(f'Running interpolation @ times_to_interpolate={times_to_interpolate}')
-    frames = list(interpolate_recursively(input_frames, times_to_interpolate, interpolator))
+    mlpg_frames = decode_keyframes(data['keyframes'])
+    normalized_float32_mlpg_frames = [(frame).astype(np.float32) / 255.0
+                                    for frame in mlpg_frames]
+    print(f'Running interpolation @ times_to_interpolate = {times_to_interpolate}')
+    interpolated_frames = list(interpolate_recursively(normalized_float32_mlpg_frames, 
+                                times_to_interpolate, interpolator))
     decompress_time = time.time() - start
     print(f'Decompressing {file} took {decompress_time} seconds.')
-    print(f'video with {len(frames)} frames')
 
-    video = VideoWriter(f'{this_file_output}/output.avi', cv2.VideoWriter_fourcc(*"MJPG"), 30, (1920, 1080))
-    upscaled_frames = upscale(frames)
-    for image in frames:
-        video.write(image)
-    cv2.destroyAllWindows()
-    video.release()
+    interpolated_numpy_frames = [np.array(frame) 
+                             for frame in interpolated_frames]
+    print(f'video with {len(interpolated_numpy_frames)} frames')
+
+    upscaled_frames = upscale(media.to_uint8(interpolated_numpy_frames), '../models/')
+    media.write_video(f'{this_file_output}/{file}.mp4', upscaled_frames, fps=30)
 
     mp4_size = os.path.getsize(f'{input_folder}/{file}')
     mlpg_size = os.path.getsize(f'{this_file_output}/data.mlpg')
@@ -52,7 +54,7 @@ for file in arr:
         file,
         mp4_size,
         mlpg_size,
-        mp4_size / mlpg_size,
+        mlpg_size / mp4_size,
         compress_time,
         decompress_time
     ]

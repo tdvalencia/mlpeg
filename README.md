@@ -10,9 +10,14 @@ TODO:
 - [x] upscaling images
 - [x] interframe data
 - [x] testing of upscale models
-- [ ] testing of interpolation models
+- [x] testing of interpolation models
 - [x] run interpolation on all frames
-- [ ] Clean repositiory
+- [x] Clean repositiory
+- [ ] BGR2RGB video output
+- [ ] Document and comment code
+- [ ] Test different constant values
+- [ ] Test on large dataset
+- [ ] Write research paper
 
 References:
 - Video Frame Interpolation via Adaptive Separable Convolution https://github.com/sniklaus/revisiting-sepconv

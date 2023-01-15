@@ -11,7 +11,7 @@ import pickle
 import io
 import sys
 
-# Why x4 compression?: For algoritm
+# x4 compression for ai models
 DOWNSCALE_RATIO = 4
 SAMPLE_RATE = 16 # Play with this value
 
@@ -37,7 +37,7 @@ def decimate(video_path, output_path):
         dimensions = frame.shape
         keyframe_indicies.append(fno)
 
-        # Downscale and write downscaled image to output path
+        # Downscale and write encoded, downscaled image to output path
         resized = cv2.resize(frame,
             (dimensions[1]//DOWNSCALE_RATIO, dimensions[0]//DOWNSCALE_RATIO))
         encoded_image = cv2.imencode('.jpg', resized)
