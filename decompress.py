@@ -5,6 +5,7 @@
     for upscaling and interpolation.
 '''
 
+import sys
 import pickle
 
 import cv2, os
@@ -39,12 +40,12 @@ def decode_keyframes(mlpg_keyframes):
     for frame in mlpg_keyframes]
 
 
-def parse_mlpg(path, filename):
+def parse_mlpg(filename):
   '''
     Opens mlpg file and decodes keyframe data
   '''
 
-  with open(f'{path}/{filename}', 'rb') as f:
+  with open(f'{filename}', 'rb') as f:
     data = pickle.load(f)
 
   return data, decode_keyframes(data['keyframes'])
@@ -235,3 +236,31 @@ def interpolate_recursively(
                                     num_recursions, interpolator)
   # Separately yield the final frame.
   yield frames[-1]
+
+if __name__ == '__main__':
+
+  import mediapy as media
+
+  interpolator = Interpolator()
+  times_to_interpolate = 1
+
+  if sys.argv[1]:
+    mlpg_data, mlpg_frames = parse_mlpg(sys.argv[1])
+  else:
+    mlpg_data, mlpeg_frames = parse_mlpg('data.mlpg')
+
+  # Run the model interpolator on the frames
+  interpolated_frames = list(interpolate_recursively(
+                              tf.convert_to_tensor(
+                                [(frame).astype(np.float32) / 255.0
+                                for frame in mlpg_frames], np.float32), 
+                                times_to_interpolate, interpolator))
+  
+  # Upscaled all the frames
+  upscaled_frames = upscale(media.to_uint8(
+                            [np.array(frame) 
+                            for frame in interpolated_frames]), 
+                            'models')
+  
+  # Write the frames to a video
+  media.write_video('output.mp4', upscaled_frames, fps=30)

@@ -62,6 +62,6 @@ def decimate(video_path, output_path):
 
 if __name__ == '__main__':
     if sys.argv[1]:
-        decimate(sys.argv[1], 'frames')
+        decimate(sys.argv[1], 'video_frames')
     else:
-        decimate('video.mp4', 'frames')
+        decimate('video.mp4', 'video.mp4')
