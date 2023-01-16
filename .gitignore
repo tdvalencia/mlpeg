@@ -165,3 +165,7 @@ youtube-dl.exe
 
 # Model Directory
 models/film
+
+# Dataset
+Inter4K
+clean-Inter4K

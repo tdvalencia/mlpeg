@@ -10,7 +10,7 @@ sys.path.insert(0, '..')
 from compress import decimate
 from decompress import Interpolator, interpolate_recursively, decode_keyframes
 
-def test_interpolation(video_path, image_width, image_height):
+def test_interpolation(video_path):
 
     # splitting the video into keyframes
     video_data = decimate(video_path, 'output')
@@ -27,7 +27,6 @@ def test_interpolation(video_path, image_width, image_height):
     interpolated_frames = list(interpolate_recursively(input_frames, times_to_interpolate,
                                         interpolator))
     media.write_video('output.mp4', media.to_uint8(interpolated_frames), fps=30)
-
 
 
 if __name__ == '__main__':
