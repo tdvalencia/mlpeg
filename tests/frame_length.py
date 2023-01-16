@@ -1,3 +1,9 @@
+'''
+    Standardize test video total frame count to 300
+    
+    Jason modify this to pull all 300 frame videos from Inter4K dataset
+'''
+
 import os
 import cv2
 
