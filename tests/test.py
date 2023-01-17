@@ -18,10 +18,10 @@ if not os.path.exists(output_folder):
 direc = f'{Path.cwd()}/{input_folder}'
 file_list = os.listdir(direc)
 
-SAMPLE_RATE = range(1, 299)
+SAMPLE_RATE = [16, 32, 64, 128]
 interpolator = Interpolator()
 
-df = pd.DataFrame(columns=['filename', 'mp4 sizes', 'mlpg sizes (mlpg/mp4)', 'ratio', 'compress time', 'decompress time', 'sample rate'])
+df = pd.DataFrame(columns=['filename', 'mp4 sizes', 'mlpg sizes', 'ratio (mlpg/mp4)', 'compress time', 'decompress time', 'sample rate'])
 
 for sample_rate in SAMPLE_RATE:
     for file in file_list:
@@ -35,7 +35,8 @@ for sample_rate in SAMPLE_RATE:
         compress_time = time.time() - start
         print(f'\nCompressing {file} took {compress_time} seconds.')
 
-        times_to_interpolate = mlpg_data['times_to_interpolate']
+        # times_to_interpolate = mlpg_data['times_to_interpolate']
+        times_to_interpolate = 1;
 
         # Test and store decompression output
         start = time.time()
@@ -46,9 +47,19 @@ for sample_rate in SAMPLE_RATE:
         print(f'Running interpolation @ times_to_interpolate = {times_to_interpolate}')
         interpolated_frames = list(interpolate_recursively(normalized_float32_mlpg_frames, 
                                     times_to_interpolate, interpolator))
-        interpolated_numpy_frames = [np.array(frame) 
+
+        print(len(interpolated_frames))
+
+        interpolated_numpy_frames = [np.array(frame)
                                 for frame in interpolated_frames]
+
+        print(np.array(interpolated_frames[0]))
+        print(interpolated_frames[0])
+
         upscaled_frames = upscale(media.to_uint8(interpolated_numpy_frames), '../models/')
+
+        print(len(upscaled_frames))
+
         media.write_video(f'{this_file_output}/{file}.mp4', upscaled_frames, fps=60)
 
         decompress_time = time.time() - start

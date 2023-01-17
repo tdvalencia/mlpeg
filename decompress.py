@@ -34,10 +34,10 @@ def decode_keyframes(mlpg_keyframes):
   #   img_np = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
   #   frames.append(img_np)
 
-  return [cv2.imdecode(
+  return [cv2.cvtColor(cv2.imdecode(
     np.frombuffer(frame.read(), np.uint8), 
-    cv2.IMREAD_UNCHANGED)
-    for frame in mlpg_keyframes]
+    cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
+    for frame in data['keyframes']]
 
 
 def parse_mlpg(filename):
