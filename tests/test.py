@@ -1,4 +1,4 @@
-import sys, os, time
+import sys, os, time, math
 from pathlib import Path
 import pandas as pd
 import mediapy as media
@@ -10,20 +10,21 @@ from compress import decimate
 from decompress import Interpolator, interpolate_recursively, upscale, decode_keyframes
 
 input_folder = 'suite_test'
-output_folder = 'suite_test_output'
-
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
 
 direc = f'{Path.cwd()}/{input_folder}'
 file_list = os.listdir(direc)
 
-SAMPLE_RATE = [16, 32, 64, 128]
+SAMPLE_RATE = [2, 4, 8, 16, 32, 64, 128]
 interpolator = Interpolator()
 
 df = pd.DataFrame(columns=['filename', 'mp4 sizes', 'mlpg sizes', 'ratio (mlpg/mp4)', 'compress time', 'decompress time', 'sample rate'])
 
 for sample_rate in SAMPLE_RATE:
+
+    output_folder = f'suite_test_output/{sample_rate}'
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
     for file in file_list:
 
         # Test and store compression output
@@ -35,8 +36,7 @@ for sample_rate in SAMPLE_RATE:
         compress_time = time.time() - start
         print(f'\nCompressing {file} took {compress_time} seconds.')
 
-        # times_to_interpolate = mlpg_data['times_to_interpolate']
-        times_to_interpolate = 1;
+        times_to_interpolate = int(math.log2(sample_rate));
 
         # Test and store decompression output
         start = time.time()
@@ -48,17 +48,10 @@ for sample_rate in SAMPLE_RATE:
         interpolated_frames = list(interpolate_recursively(normalized_float32_mlpg_frames, 
                                     times_to_interpolate, interpolator))
 
-        print(len(interpolated_frames))
-
         interpolated_numpy_frames = [np.array(frame)
                                 for frame in interpolated_frames]
 
-        print(np.array(interpolated_frames[0]))
-        print(interpolated_frames[0])
-
         upscaled_frames = upscale(media.to_uint8(interpolated_numpy_frames), '../models/')
-
-        print(len(upscaled_frames))
 
         media.write_video(f'{this_file_output}/{file}.mp4', upscaled_frames, fps=60)
 
