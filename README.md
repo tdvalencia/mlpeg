@@ -2,22 +2,9 @@
 
 Data compression implemented in machine learning
 
-TODO:
-- [x] Project Directory
-- [x] Download Data
-- [x] Clean Data
-- [x] temporal reconstruction
-- [x] upscaling images
-- [x] interframe data
-- [x] testing of upscale models
-- [x] testing of interpolation models
-- [x] run interpolation on all frames
-- [x] Clean repositiory
-- [ ] BGR2RGB video output
-- [ ] Document and comment code
-- [ ] Test different constant values
-- [ ] Test on large dataset
-- [ ] Write research paper
+![board](res/MLPEG%20Research%20Board.png)
+
+[Research Paper](res/MLPEG%20Research%20Paper.pdf)
 
 References:
 - Video Frame Interpolation via Adaptive Separable Convolution https://github.com/sniklaus/revisiting-sepconv
